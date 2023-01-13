@@ -20,9 +20,12 @@ struct Board {
 }
 impl Board {
     fn new() -> Self {
-        Board {
+        let mut board = Board {
             matrix: [[Square::new(); 4]; 4],
-        }
+        };
+        board.set_rnd_avaible_square();
+        board.set_rnd_avaible_square();
+        board
     }
     fn prepare_board(&mut self) {
         for i in 0..self.matrix.len() {
@@ -30,10 +33,8 @@ impl Board {
                 self.matrix[i][z].value = 0;
             }
         }
-
-        let mut rng = rand::thread_rng();
-        let mut i: i32 = rng.gen_range(0..4);
-        let mut z: i32 = rng.gen_range(0..4);
+        self.set_rnd_avaible_square();
+        // self.matrix.set_rnd_avaible_square();
     }
 
     fn is_board_full(&self) -> bool {
@@ -53,9 +54,9 @@ impl Board {
             false
         }
     }
-    fn get_rnd_avaible_square(&self) -> Option<[usize; 2]> {
+    fn set_rnd_avaible_square(&mut self) -> bool {
         if self.is_board_full() {
-            None
+            false
         } else {
             let mut rng = rand::thread_rng();
             let mut y: usize = rng.gen_range(0..4);
@@ -65,11 +66,20 @@ impl Board {
                 x = rng.gen_range(0..4);
                 y = rng.gen_range(0..4);
             }
-            let coordinates: [usize; 2] = [x, y];
-            Some(coordinates)
+            self.matrix[x][y].decide_number();
+            true
+        }
+    }
+    fn print_board(&self) {
+        for i in 0..self.matrix.len() {
+            for z in 0..self.matrix[i].len() {
+                print!("[{}]", self.matrix[i][z].value);
+            }
+            println!()
         }
     }
 }
+
 #[derive(Debug, Clone, Copy)]
 struct Square {
     value: i32,
@@ -100,20 +110,7 @@ impl Square {
 
 fn main() {
     let mut game = Game::new();
-
-    println!("{}", game.board.is_board_full());
-    println!("{:?}", game.board.get_rnd_avaible_square());
-
-    for i in 0..game.board.matrix.len() {
-        for z in 0..game.board.matrix[i].len() {
-            game.board.matrix[i][z].decide_number();
-
-            print!("{:?}  ", game.board.matrix[i][z]);
-            println!("{:?}", game.board.get_rnd_avaible_square());
-        }
-        println!()
-    }
-    println!("{}", game.board.is_board_full());
-
-    println!("{:?}", game.board.get_rnd_avaible_square());
+    // for i in 0..16 {
+    game.board.print_board();
+    // }
 }
