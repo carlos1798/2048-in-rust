@@ -43,6 +43,9 @@ game_over
 * check if a sum is possible 
 * If is not then is GAME OVER
 
-
+Where should i put this??
+the movement in the board strut obv
+but the sums?
+maybe the sums in the square struct since already sets the values for the sqares
 
 
