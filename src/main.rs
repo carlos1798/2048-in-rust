@@ -23,6 +23,7 @@ impl Board {
         let mut board = Board {
             matrix: [[Square::new(); 4]; 4],
         };
+
         board.set_rnd_avaible_square();
         board.set_rnd_avaible_square();
         board
@@ -33,8 +34,6 @@ impl Board {
                 self.matrix[i][z].value = 0;
             }
         }
-        self.set_rnd_avaible_square();
-        // self.matrix.set_rnd_avaible_square();
     }
 
     fn is_board_full(&self) -> bool {
