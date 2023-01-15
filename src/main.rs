@@ -163,9 +163,9 @@ fn centered_rect(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
         .split(popup_layout[1])[1]
 }
 
-fn run_app<B: Backend>(terminal: &mut Terminal<B>) -> io::Result<()> {
+fn run_app<B: Backend>(terminal: &mut Terminal<B>,mut game:Game) -> io::Result<()> {
     loop {
- terminal.draw(ui)?;
+ terminal.draw(|f| ui(f,&game))?;
         if let Event::Key(key) = event::read()? {
             if let KeyCode::Char('q') = key.code {
                 return Ok(());
@@ -174,8 +174,8 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>) -> io::Result<()> {
     }
     
 }
-fn ui<B: Backend>(f: &mut Frame<B>) {
-            let mut game = Game::new();
+fn ui<B: Backend>(f: &mut Frame<B>,game:&Game) {
+
             let rows = game.board.matrix.len();
             let cols = game.board.matrix[0].len();
             let size = f.size();
@@ -238,9 +238,11 @@ fn main()-> Result<(),io::Error> {
         EnterAlternateScreen,
         EnableMouseCapture
     )?;
+
+    let mut game = Game::new();
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
-    let res = run_app(&mut terminal);
+    let res = run_app(&mut terminal,game);
     disable_raw_mode()?;
     execute!(
         terminal.backend_mut(),
