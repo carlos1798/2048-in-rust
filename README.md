@@ -1,5 +1,6 @@
-# 2048-in-rust
-========================
+#### 2048-in-rust
+======:q
+==================
 Implemented:
 ------------
 Game Struct
@@ -16,12 +17,15 @@ Key::events
 Interface
 
 -------------
-Movement!!
+##Movement!!
 -------------
 [11][12][13][14]
 [21][22][23][24]
 [31][32][33][34]
 [41][42][43][44]
+
+First thing is to move all the squares 
+then add the number
 
 Conditions:
 Always check conditions after a move
@@ -47,5 +51,6 @@ Where should i put this??
 the movement in the board strut obv
 but the sums?
 maybe the sums in the square struct since already sets the values for the sqares
+for now i just input the self parameter for this fuctions
 
 
