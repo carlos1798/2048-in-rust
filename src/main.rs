@@ -6,6 +6,7 @@ use crossterm::terminal::{enable_raw_mode, LeaveAlternateScreen, EnterAlternateS
 use tui::backend::{CrosstermBackend, Backend};
 use tui::style::{Style, Color, Modifier};
 use tui::text::{Span, Text};
+use tui::widgets::canvas::{Line, MapResolution, Canvas, self, Map, Rectangle};
 use tui::widgets::{Block, Borders, Widget, BorderType, Paragraph };
 use tui::layout::{Constraint, Direction, Layout, Rect, Alignment};
 use tui::{Terminal, Frame};
@@ -164,21 +165,27 @@ fn centered_rect(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
 }
 
 fn run_app<B: Backend>(terminal: &mut Terminal<B>,mut game:Game) -> io::Result<()> {
+
     loop {
  terminal.draw(|f| ui(f,&game))?;
         if let Event::Key(key) = event::read()? {
             if let KeyCode::Char('q') = key.code {
                 return Ok(());
             }
+            if let KeyCode::Char('k') = key.code {
+                game.board.set_rnd_avaible_square();
+            }
+
         }
     }
     
 }
 fn ui<B: Backend>(f: &mut Frame<B>,game:&Game) {
 
+
             let rows = game.board.matrix.len();
             let cols = game.board.matrix[0].len();
-            let size = f.size();
+            let size =f.size();
        
 
             
@@ -197,9 +204,11 @@ fn ui<B: Backend>(f: &mut Frame<B>,game:&Game) {
                     let value = square.value;
                     let str_value = format!("{}", value);
                         
-                    let mut block = Block::default().borders(Borders::ALL);
-
-                    
+                    let mut block = Block::default().borders(Borders::ALL).style(Style::default());
+                    let white :Block = Block::default().borders(Borders::ALL).style(Style::default().bg(Color::White));
+                    let yellow :Block = Block::default().borders(Borders::ALL).style(Style::default().bg(Color::LightYellow));
+                    let white :Block = Block::default().borders(Borders::ALL).style(Style::default().bg(Color::White));
+                    let white :Block = Block::default().borders(Borders::ALL).style(Style::default().bg(Color::White));
 
                     let x = j as u16 * (size.width / cols as u16);
                     let y = i as u16 * (size.height / rows as u16);
@@ -208,19 +217,31 @@ fn ui<B: Backend>(f: &mut Frame<B>,game:&Game) {
                     let area = Rect { x, y, width, height };
 
 
-                   let area_test = centered_rect(50,10,area);
+                   let area_test = centered_rect(10,12,area);
 
 
                     
 
+                   if value==2{
 
+                    f.render_widget(white, area);
+
+                   }else if value == 4{
+
+                    f.render_widget(yellow, area);
+                    
+                   }
+                   else{
                     f.render_widget(block, area);
-                    f.render_widget(Block::default().title(
-                     Span::styled(str_value,
-                        Style::default().add_modifier(Modifier::BOLD))).title_alignment(Alignment::Center),area_test);
+                   }
 
-                }
+                     f.render_widget(Block::default().title(
+                    Span::styled(str_value,
+                      Style::default().add_modifier(Modifier::BOLD).fg(Color::Black))).title_alignment(Alignment::Center),area_test);
+
+                // }
     }
+}
 }
 
 
