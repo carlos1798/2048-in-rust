@@ -1,6 +1,10 @@
 #### 2048-in-rust
-======:q
-==================
+
+In adaptation of the popular game in the terminal using rust
+
+
+
+
 Implemented:
 ------------
 Game Struct
