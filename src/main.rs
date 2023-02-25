@@ -1,17 +1,19 @@
 use std::io;
 
-use crossterm::event::{DisableMouseCapture, EnableMouseCapture, Event, self, KeyCode};
+use crossterm::event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode};
 use crossterm::execute;
-use crossterm::terminal::{enable_raw_mode, LeaveAlternateScreen, EnterAlternateScreen, disable_raw_mode};
-use tui::backend::{CrosstermBackend, Backend};
-use tui::style::{Style, Color, Modifier};
-use tui::text::{Span, Text};
-use tui::widgets::canvas::{Line, MapResolution, Canvas, self, Map, Rectangle};
-use tui::widgets::{Block, Borders, Widget, BorderType, Paragraph };
-use tui::layout::{Constraint, Direction, Layout, Rect, Alignment};
-use tui::{Terminal, Frame};
-use rand::{Rng};
+use crossterm::terminal::{
+    disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen,
+};
+use rand::Rng;
 use std::usize;
+use tui::backend::{Backend, CrosstermBackend};
+use tui::layout::{Alignment, Constraint, Direction, Layout, Rect};
+use tui::style::{Color, Modifier, Style};
+use tui::text::{Span, Text};
+use tui::widgets::canvas::{self, Canvas, Line, Map, MapResolution, Rectangle};
+use tui::widgets::{Block, BorderType, Borders, Paragraph, Widget};
+use tui::{Frame, Terminal};
 
 struct Game {
     start: bool,
@@ -88,25 +90,79 @@ impl Board {
             println!()
         }
     }
-    fn right_movement(&self)->bool{
-        todo!()
 
+    fn right_movement(&mut self) {
+        for row in 0..self.matrix.len() {
+            for col in 0..self.matrix[row].len() - 1 {
+                if self.matrix[row][col].value != 0 {
+                    let mut next_col = col + 1;
+                    while next_col < self.matrix[row].len() && self.matrix[row][next_col].value == 0 {
+                        self.matrix[row][next_col].value = self.matrix[row][next_col - 1].value;
+                        self.matrix[row][next_col - 1].value = 0;
+                        next_col += 1;
+                    }
+                    if next_col < self.matrix[row].len() && self.matrix[row][next_col].value == self.matrix[row][next_col - 1].value {
+                        self.matrix[row][next_col].value += self.matrix[row][next_col - 1].value;
+                        self.matrix[row][next_col - 1].value = 0;
+                    }
+                }
+            }
+        }
     }
-    fn up_movement(&self)->bool{
 
-        todo!()
+    fn up_movement(&mut self) {
+        for i in 0..self.matrix[0].len() {
+            for z in 0..self.matrix.len() - 1 {
+                let mut current = z;
+                while current > 0 {
+                    if self.matrix[current - 1][i].value == 0 {
+                        self.matrix[current - 1][i].value = self.matrix[current][i].value;
+                        self.matrix[current][i].value = 0;
+                    } else if self.matrix[current - 1][i].value == self.matrix[current][i].value {
+                        self.matrix[current - 1][i].value += self.matrix[current][i].value;
+                        self.matrix[current][i].value = 0;
+                    }
+                    current -= 1;
+                }
+            }
+        }
     }
-    fn down_movement(&self)->bool{
 
-        todo!()
+    fn down_movement(&mut self) {
+        for i in 0..self.matrix[0].len() {
+            for z in (0..self.matrix.len() - 1).rev() {
+                let mut current = z;
+                while current < self.matrix.len() - 1 {
+                    if self.matrix[current + 1][i].value == 0 {
+                        self.matrix[current + 1][i].value = self.matrix[current][i].value;
+                        self.matrix[current][i].value = 0;
+                    } else if self.matrix[current + 1][i].value == self.matrix[current][i].value {
+                        self.matrix[current + 1][i].value += self.matrix[current][i].value;
+                        self.matrix[current][i].value = 0;
+                    }
+                    current += 1;
+                }
+            }
+        }
     }
-    fn left_movement(&self)->bool{
-
-        todo!()
+    fn left_movement(&mut self) {
+        for row in 0..self.matrix.len() {
+            for col in 1..self.matrix[row].len() {
+                if self.matrix[row][col].value != 0 {
+                    let mut prev_col = col as i32 - 1;
+                    while prev_col >= 0 && self.matrix[row][prev_col as usize].value == 0 {
+                        self.matrix[row][prev_col as usize].value = self.matrix[row][prev_col as usize + 1].value;
+                        self.matrix[row][prev_col as usize + 1].value = 0;
+                        prev_col -= 1;
+                    }
+                    if prev_col >= 0 && self.matrix[row][prev_col as usize].value == self.matrix[row][prev_col as usize + 1].value {
+                        self.matrix[row][prev_col as usize].value += self.matrix[row][prev_col as usize + 1].value;
+                        self.matrix[row][prev_col as usize + 1].value = 0;
+                    }
+                }
+            }
+        }
     }
-
-
-
 
 }
 
@@ -114,7 +170,6 @@ impl Board {
 struct Square {
     value: i32,
 }
-
 impl Square {
     fn new() -> Self {
         Self { value: (0) }
@@ -164,116 +219,157 @@ fn centered_rect(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
         .split(popup_layout[1])[1]
 }
 
-fn run_app<B: Backend>(terminal: &mut Terminal<B>,mut game:Game) -> io::Result<()> {
-
+fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut game: Game) -> io::Result<()> {
     loop {
- terminal.draw(|f| ui(f,&game))?;
+        terminal.draw(|f| ui(f, &game))?;
         if let Event::Key(key) = event::read()? {
             if let KeyCode::Char('q') = key.code {
                 return Ok(());
-            }
-            if let KeyCode::Char('k') = key.code {
+            } else if let KeyCode::Char('k') = key.code {
+                game.board.set_rnd_avaible_square();
+            } else if let KeyCode::Left = key.code {
+                game.board.left_movement();
+                game.board.set_rnd_avaible_square();
+            } else if let KeyCode::Up = key.code {
+                game.board.up_movement();
+                game.board.set_rnd_avaible_square();
+            } else if let KeyCode::Right = key.code {
+                game.board.right_movement();
+                game.board.set_rnd_avaible_square();
+            } else if let KeyCode::Down = key.code {
+                game.board.down_movement();
                 game.board.set_rnd_avaible_square();
             }
-
         }
     }
-    
 }
-fn ui<B: Backend>(f: &mut Frame<B>,game:&Game) {
+fn ui<B: Backend>(f: &mut Frame<B>, game: &Game) {
+    let rows = game.board.matrix.len();
+    let cols = game.board.matrix[0].len();
+    let size = f.size();
 
+    let chunks = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([Constraint::Percentage(100)].as_ref())
+        .split(f.size());
 
-            let rows = game.board.matrix.len();
-            let cols = game.board.matrix[0].len();
-            let size =f.size();
-       
+    for (i, row) in game.board.matrix.iter().enumerate() {
+        for (j, cell) in row.iter().enumerate() {
+            let square = game.board.matrix[i][j];
+            let value = square.value;
+            let str_value = format!("{}", value);
 
-            
-            let chunks = Layout::default()
-                .direction(Direction::Vertical)
-                .constraints([Constraint::Percentage(100)].as_ref())
-                .split(f.size());
+            let mut block = Block::default()
+                .borders(Borders::ALL)
+                .style(Style::default());
+            let two: Block = Block::default()
+                .borders(Borders::ALL)
+                .style(Style::default().bg(Color::Rgb(238, 228, 218)));
+            let four: Block = Block::default()
+                .borders(Borders::ALL)
+                .style(Style::default().bg(Color::Rgb(237, 224, 200)));
+            let eight: Block = Block::default()
+                .borders(Borders::ALL)
+                .style(Style::default().bg(Color::Rgb(242, 177, 121)));
+            let sixteen: Block = Block::default()
+                .borders(Borders::ALL)
+                .style(Style::default().bg(Color::Rgb(245, 149, 99)));
+            let thirtytwo: Block = Block::default()
+                .borders(Borders::ALL)
+                .style(Style::default().bg(Color::Rgb(246, 124, 95)));
+            let sixtyfour: Block = Block::default()
+                .borders(Borders::ALL)
+                .style(Style::default().bg(Color::Rgb(246, 94, 59)));
+            let onetwentyeight: Block = Block::default()
+                .borders(Borders::ALL)
+                .style(Style::default().bg(Color::Rgb(237, 207, 114)));
+            let twosixfive: Block = Block::default()
+                .borders(Borders::ALL)
+                .style(Style::default().bg(Color::Rgb(237, 204, 97)));
+            let fiveonetwo: Block = Block::default()
+                .borders(Borders::ALL)
+                .style(Style::default().bg(Color::Rgb(237, 200, 80)));
+            let onezero24: Block = Block::default()
+                .borders(Borders::ALL)
+                .style(Style::default().bg(Color::Rgb(237, 197, 63)));
+            let two048: Block = Block::default()
+                .borders(Borders::ALL)
+                .style(Style::default().bg(Color::Rgb(237, 194, 46)));
+            let white: Block = Block::default()
+                .borders(Borders::ALL)
+                .style(Style::default().bg(Color::Rgb((20), (20), (1))));
 
-            
-            
+            let x = j as u16 * (size.width / cols as u16);
+            let y = i as u16 * (size.height / rows as u16);
+            let width = size.width / cols as u16;
+            let height = size.height / rows as u16;
+            let area = Rect {
+                x,
+                y,
+                width,
+                height,
+            };
 
-            for (i, row) in game.board.matrix.iter().enumerate() {
-                for (j, cell) in row.iter().enumerate() {
+            let area_test = centered_rect(10, 12, area);
 
-                    let square = game.board.matrix[i][j];
-                    let value = square.value;
-                    let str_value = format!("{}", value);
-                        
-                    let mut block = Block::default().borders(Borders::ALL).style(Style::default());
-                    let white :Block = Block::default().borders(Borders::ALL).style(Style::default().bg(Color::White));
-                    let yellow :Block = Block::default().borders(Borders::ALL).style(Style::default().bg(Color::LightYellow));
-                    let white :Block = Block::default().borders(Borders::ALL).style(Style::default().bg(Color::White));
-                    let white :Block = Block::default().borders(Borders::ALL).style(Style::default().bg(Color::White));
+            if value == 0 {
+                f.render_widget(block, area);
+            } else if value == 2 {
+                f.render_widget(two, area);
+            } else if value == 4 {
+                f.render_widget(four, area);
+            } else if value == 8 {
+                f.render_widget(eight, area);
+            } else if value == 16 {
+                f.render_widget(sixteen, area);
+            } else if value == 32 {
+                f.render_widget(thirtytwo, area);
+            } else if value == 64 {
+                f.render_widget(sixtyfour, area);
+            } else if value == 128 {
+                f.render_widget(onetwentyeight, area);
+            } else if value == 256 {
+                f.render_widget(twosixfive, area);
+            } else if value == 1024 {
+                f.render_widget(onezero24, area);
+            } else if value == 2048 {
+                f.render_widget(two048, area);
+            } else {
+                f.render_widget(block, area);
+            }
 
-                    let x = j as u16 * (size.width / cols as u16);
-                    let y = i as u16 * (size.height / rows as u16);
-                    let width = size.width / cols as u16;
-                    let height = size.height / rows as u16;
-                    let area = Rect { x, y, width, height };
+            f.render_widget(
+                Block::default()
+                    .title(Span::styled(
+                        str_value,
+                        Style::default()
+                            .add_modifier(Modifier::BOLD)
+                            .fg(Color::Black),
+                    ))
+                    .title_alignment(Alignment::Center),
+                area_test,
+            );
 
-
-                   let area_test = centered_rect(10,12,area);
-
-
-                    
-
-                   if value==2{
-
-                    f.render_widget(white, area);
-
-                   }else if value == 4{
-
-                    f.render_widget(yellow, area);
-                    
-                   }
-                   else{
-                    f.render_widget(block, area);
-                   }
-
-                     f.render_widget(Block::default().title(
-                    Span::styled(str_value,
-                      Style::default().add_modifier(Modifier::BOLD).fg(Color::Black))).title_alignment(Alignment::Center),area_test);
-
-                // }
+            // }
+        }
     }
 }
-}
 
-
-
-
-
-
-
-fn main()-> Result<(),io::Error> {
+fn main() -> Result<(), io::Error> {
     // Initialize terminal
     enable_raw_mode()?;
     let mut stdout = std::io::stdout();
-    execute!(
-        stdout,
-        EnterAlternateScreen,
-        EnableMouseCapture
-    )?;
+    execute!(stdout, EnterAlternateScreen, EnableMouseCapture)?;
 
     let mut game = Game::new();
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
-    let res = run_app(&mut terminal,game);
+    let res = run_app(&mut terminal, game);
     disable_raw_mode()?;
     execute!(
         terminal.backend_mut(),
         LeaveAlternateScreen,
         DisableMouseCapture
     );
-
-
-
-            
-
     Ok(())
 }

@@ -24,6 +24,9 @@ Interface
 [31][32][33][34]
 [41][42][43][44]
 
+[11][12][13][14]
+
+
 First thing is to move all the squares 
 then add the number
 
