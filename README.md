@@ -18,7 +18,7 @@ Implement the rule system for the game.
 Fix movement
 Lost state
 
-[Screenshot from 2023-02-25 12-52-49](https://user-images.githubusercontent.com/24571992/221355388-a87a3de3-8b4b-4272-aa30-4e59ebb19598.png)
+![Screenshot from 2023-02-25 12-52-49](https://user-images.githubusercontent.com/24571992/221355388-a87a3de3-8b4b-4272-aa30-4e59ebb19598.png)
 
 ##Movement!!
 -------------
