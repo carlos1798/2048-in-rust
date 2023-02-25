@@ -6,15 +6,14 @@ Implemented:
 Game Struct
 Board struct
 Square struct
-
+Key::Events
 -------------
 Missing:
 -------------
 Implement the rule system for the game.
-Movement!!
+Fix movement
 Lost state
-Key::events
-Interface
+
 
 -------------
 ##Movement!!
@@ -24,36 +23,10 @@ Interface
 [31][32][33][34]
 [41][42][43][44]
 
-[11][12][13][14]
-
-
-First thing is to move all the squares 
-then add the number
-
-Conditions:
-Always check conditions after a move
-
-This one after adding a square:
-if(sum_possible){
-do sum
-}
-
-if (!sum_possible && board_full){
-game_over
-}
+Controls: 
+ArrowKeys for movement 
+Q  for quit
 
 
 
-
-* Check if the board is not full 
-* Add Square
-* check if a sum is possible 
-* If is not then is GAME OVER
-
-Where should i put this??
-the movement in the board strut obv
-but the sums?
-maybe the sums in the square struct since already sets the values for the sqares
-for now i just input the self parameter for this fuctions
-
-
+![Screenshot from 2023-02-25 12-47-43](https://user-images.githubusercontent.com/24571992/221355289-d3b36a8d-03d8-44ff-8f74-5f7d0c7cc93d.png)
