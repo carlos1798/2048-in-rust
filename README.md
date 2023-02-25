@@ -6,7 +6,7 @@ In adaptation of the popular game in the terminal using rust
 
 
 Implemented:
-
+-------------
 Game Struct
 Board struct
 Square struct
