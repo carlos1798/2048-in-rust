@@ -6,12 +6,13 @@ In adaptation of the popular game in the terminal using rust
 
 
 Implemented:
-------------
+
 Game Struct
 Board struct
 Square struct
 Key::Events
--------------
+
+
 Missing:
 -------------
 Implement the rule system for the game.
